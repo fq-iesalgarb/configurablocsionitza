@@ -91,7 +91,7 @@
 
         /* Excepcions Bloc f: To rosa/magenta lluminós destacat */
         .element-card.is-exception-f {
-            background-color: #f43f5e !important; /* Coral / Magenta vibrant */
+            background-color: #f43f5e !important;
             color: #ffffff !important;
             border: 1px solid #fecdd3 !important;
             box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.7);
@@ -219,8 +219,11 @@
                         <div id="katexConfig" class="text-lg overflow-x-auto py-1 min-h-[44px] flex items-center">
                             <!-- KaTeX integrat -->
                         </div>
-                        <div id="ionStateBadge" class="hidden mt-2 text-xs font-bold inline-block px-2.5 py-1 bg-red-500 text-white rounded-md">
-                            Espècie Ionitzada
+                        <!-- Contenidor amb alçada reservada fixa per evitar el desplaçament vertical (Layout Shift) -->
+                        <div class="min-h-[24px] mt-2 flex items-center">
+                            <div id="ionStateBadge" class="hidden text-xs font-bold inline-block px-2.5 py-1 bg-red-500 text-white rounded-md">
+                                Espècie Ionitzada
+                            </div>
                         </div>
                     </div>
 
@@ -317,7 +320,7 @@
                 </p>
                 <ul class="list-disc list-inside space-y-2 text-xs md:text-sm">
                     <li>
-                        <strong>Principi d'Aufbau vs Configuració Real:</strong> La regla de Madelung indica l'ordre d'energia teòric. No obstant això, certs elements (com el Crom <span class="katex-inline" data-expr="Cr"></span>, Coure <span class="katex-inline" data-expr="Cu"></span>, o Pal·ladi <span class="katex-inline" data-expr="Pd"></span>) promouen electrons des de l'orbital <span class="katex-inline" data-expr="s"></span> cap a subnivells <span class="katex-inline" data-expr="d"></span> o <span class="katex-inline" data-expr="f"></span> per aconseguir una configuració semiple (<span class="katex-inline" data-expr="d^5, f^7"></span>) o totalment plena (<span class="katex-inline" data-expr="d^{10}, f^{14}"></span>) d'alta estabilitat. Activa el commutador superior per comparar ambdues configuracions i veure els elements ressaltats per blocs.
+                        <strong>Principi d'Aufbau vs Configuració Real:</strong> La regla de Madelung indica l'ordre d'energia teòric. No obstant això, certs elements (com el Crom <span class="katex-inline" data-expr="Cr"></span>, Coure <span class="katex-inline" data-expr="Cu"></span>, o Pal·ladi <span class="katex-inline" data-expr="Pd"></span>) promouen electrons des de l'orbital <span class="katex-inline" data-expr="s"></span> cap a subnivells <span class="katex-inline" data-expr="d"></span> o <span class="katex-inline" data-expr="f"></span> per aconseguir una configuració semiple (<span class="katex-inline" data-expr="d^5, f^7"></span>) o totalment plena (<span class="katex-inline" data-expr="d^{10}, f^{14}"></span>) d'alta estabilitat. Activa el commutador superior per comparar ambdues configuracions i veure els elements reshaltats per blocs.
                     </li>
                     <li>
                         <strong>Ionització des de la Capa de València:</strong> Quan un àtom perd electrons per formar un catió, aquests s'extreuen sempre de la capa més externa (<span class="katex-inline" data-expr="n_{\max}"></span>), encara que s'hagin emplenat en darrer lloc orbitals d'energia inferior com <span class="katex-inline" data-expr="3d"></span> o <span class="katex-inline" data-expr="4f"></span>.
@@ -599,7 +602,6 @@
             updateExtendedTableExceptions();
         }
 
-        // Ressaltat diferenciat per blocs d i f
         function updateExtendedTableExceptions() {
             document.querySelectorAll('.element-card[data-z]').forEach(card => {
                 const z = parseInt(card.dataset.z);
@@ -717,7 +719,15 @@
             }
 
             if (subshells.length === 0) {
-                document.getElementById('katexConfig').innerHTML = `\\text{Sense electrons}`;
+                // Correcció per l'Hidrogen ionitzat: Sense text \text{...} en brut
+                if (window.katex) {
+                    katex.render('\\text{Sense electrons}', document.getElementById('katexConfig'), {
+                        throwOnError: false,
+                        displayMode: false
+                    });
+                } else {
+                    document.getElementById('katexConfig').textContent = "Sense electrons";
+                }
                 return;
             }
 
