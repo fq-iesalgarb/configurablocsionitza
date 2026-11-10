@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuració Electrònica i Taula Estesa - IES Algarb</title>
+    
+    <!-- Favicon personalitzat obligatori -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        blockS: '#3b82f6',
+                        blockP: '#10b981',
+                        blockD: '#f59e0b',
+                        blockF: '#ec4899',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- KaTeX CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        ::-webkit-scrollbar { height: 8px; width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.5); border-radius: 4px; }
+        
+        .grid-extended {
+            display: grid;
+            grid-template-columns: repeat(32, minmax(28px, 1fr));
+            gap: 2px;
+        }
+
+        .element-card {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            user-select: none;
+            position: relative;
+            box-sizing: border-box;
+        }
+        
+        .element-card:hover {
+            z-index: 20;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .element-card.active {
+            outline: 2px solid #ffffff;
+            outline-offset: -1px;
+            z-index: 30;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.9);
+        }
+
+        /* Excepcions Bloc d: To groc/daurat vibrant */
+        .element-card.is-exception-d {
+            background-color: #f59e0b !important;
+            color: #0f172a !important;
+            border: 1px solid #fef08a !important;
+            box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.7);
+        }
+        .element-card.is-exception-d::after {
+            content: '!';
+            position: absolute;
+            top: 1px;
+            right: 2px;
+            font-size: 8px;
+            font-weight: 900;
+            color: #78350f;
+        }
+
+        /* Excepcions Bloc f: To rosa/magenta lluminós destacat */
+        .element-card.is-exception-f {
+            background-color: #f43f5e !important;
+            color: #ffffff !important;
+            border: 1px solid #fecdd3 !important;
+            box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.7);
+        }
+        .element-card.is-exception-f::after {
+            content: '!';
+            position: absolute;
+            top: 1px;
+            right: 2px;
+            font-size: 8px;
+            font-weight: 900;
+            color: #ffffff;
+        }
+
+        @keyframes pulse-ring {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        .active-pulse { animation: pulse-ring 2s infinite ease-in-out; }
+
+        /* Animació de Parpalleig / Flash per als subnivells de Moeller */
+        @keyframes moeller-flash {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0px rgba(245, 158, 11, 0);
+                filter: brightness(1);
+            }
+            35% {
+                transform: scale(1.18);
+                box-shadow: 0 0 20px #f59e0b, 0 0 32px #ec4899;
+                filter: brightness(1.7);
+                border-color: #f59e0b !important;
+                z-index: 40;
+            }
+            70% {
+                transform: scale(1.08);
+                box-shadow: 0 0 12px #f59e0b;
+                filter: brightness(1.3);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0px rgba(245, 158, 11, 0);
+                filter: brightness(1);
+            }
+        }
+        .flash-subshell {
+            animation: moeller-flash 0.75s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+
+    <!-- Capçalera principal (IES Algarb) -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                    <i class="fa-solid font-mono fa-atom"></i>
+                </div>
+                <div>
+                    <h1 class="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold">IES ALGARB — Departament de Física i Química</h1>
+                    <h2 class="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white">Construcció Atòmica & Taula Periòdica Estesa</h2>
+                </div>
+            </div>
+
+            <!-- Controls de tema i llegenda -->
+            <div class="flex items-center gap-4">
+                <div class="hidden lg:flex items-center gap-3 text-xs font-medium px-3 py-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Bloc s</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Bloc p</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Bloc d</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-pink-500 inline-block"></span> Bloc f</span>
+                    <span class="flex items-center gap-1 border-l border-slate-300 dark:border-slate-600 pl-2"><span class="w-3 h-3 rounded bg-amber-500 inline-block"></span> Exc. d</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-rose-500 inline-block"></span> Exc. f</span>
+                </div>
+
+                <!-- Botó Mode Fosc / Lluminós -->
+                <button id="themeToggle" class="p-2.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition" title="Canviar mode fosc/clar">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contingut Principal -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 flex flex-col gap-6">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Canvas Model Atòmic -->
+            <div class="lg:col-span-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-md border border-slate-200 dark:border-slate-700 flex flex-col items-center relative">
+                <div class="w-full flex justify-between items-center mb-2 px-2">
+                    <span class="text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center">
+                        <i class="fa-solid fa-circle-nodes text-indigo-500 mr-1.5"></i> Model Atòmic de Bohr (<span id="bohrNText" class="ml-1">n=1..7</span>)
+                    </span>
+                    <span id="valenceNotice" class="text-xs px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded font-medium">
+                        Capa valència en moviment
+                    </span>
+                </div>
+
+                <div class="relative w-full aspect-square max-w-[420px] bg-slate-950 rounded-xl overflow-hidden shadow-inner flex items-center justify-center">
+                    <canvas id="bohrCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                </div>
+
+                <div class="mt-3 text-xs text-slate-600 dark:text-slate-400 text-center max-w-md">
+                    * Només els electrons de la <strong>capa de valència (<span id="bohrNVal">n_max</span>)</strong> es troben en rotació contínua.
+                </div>
+            </div>
+
+            <!-- Controls i Detalls Químics -->
+            <div class="lg:col-span-6 flex flex-col gap-4">
+                
+                <!-- Targeta de l'Element, KaTeX i Diagrama de Moeller -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-md border border-slate-200 dark:border-slate-700">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-xs font-bold tracking-widest text-indigo-500 uppercase">Element Químic (Z = <span id="elemZ">1</span>)</span>
+                            <div class="flex items-baseline gap-3 mt-1">
+                                <h2 id="elemSymbol" class="text-4xl font-black text-slate-900 dark:text-white">H</h2>
+                                <h3 id="elemName" class="text-2xl font-bold text-slate-600 dark:text-slate-300">Hidrogen</h3>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <div id="blockBadge" class="px-3 py-1 rounded-lg text-white font-bold text-xs bg-blue-500 shadow">
+                                Bloc s
+                            </div>
+                            <!-- BOTÓ DE COMMUTACIÓ VISTA STANDARD / MOELLER -->
+                            <button id="btnToggleMoeller" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 border border-indigo-200 dark:border-indigo-700 transition flex items-center gap-1.5 shadow-sm">
+                                <i id="toggleViewIcon" class="fa-solid fa-diagram-project text-indigo-500"></i>
+                                <span id="toggleViewText">Diagrama de Moeller</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- VISTA 1: CONFIGURACIÓ ELECTRÒNICA STANDARD (KaTeX) -->
+                    <div id="viewConfig" class="flex flex-col gap-3">
+                        <!-- COMMUTADOR CONFIGURACIÓ TEÒRICA VS REAL -->
+                        <div class="p-2.5 bg-slate-100 dark:bg-slate-700/40 rounded-lg flex items-center justify-between border border-slate-200 dark:border-slate-600">
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-sliders text-indigo-500"></i> Mode de Configuració:
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <span id="modeTheoreticalLabel" class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Teòrica (Aufbau)</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="configModeToggle" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:after:border-slate-600 peer-checked:bg-amber-500"></div>
+                                </label>
+                                <span id="modeRealLabel" class="text-xs font-medium text-slate-400">Real (Excepcions)</span>
+                            </div>
+                        </div>
+
+                        <!-- Configuració Electrònica KaTeX -->
+                        <div class="bg-slate-50 dark:bg-slate-900/80 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                                    Configuració Electrònica:
+                                </span>
+                                <span id="exceptionBadge" class="hidden text-[10px] uppercase font-extrabold px-2 py-0.5 bg-amber-500 text-slate-900 rounded">
+                                    Excepció d'Estabilitat
+                                </span>
+                            </div>
+                            <div id="katexConfig" class="text-lg overflow-x-auto py-1 min-h-[44px] flex items-center">
+                                <!-- KaTeX integrat -->
+                            </div>
+                            <div class="min-h-[24px] mt-2 flex items-center">
+                                <div id="ionStateBadge" class="hidden text-xs font-bold inline-block px-2.5 py-1 bg-red-500 text-white rounded-md">
+                                    Espècie Ionitzada
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resum orbital -->
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="bg-slate-100 dark:bg-slate-700/50 p-2 rounded">
+                                <span class="block text-slate-400">Darrer Subnivell</span>
+                                <strong id="lastSubshell" class="text-sm font-semibold text-slate-800 dark:text-slate-200">1s¹</strong>
+                            </div>
+                            <div class="bg-slate-100 dark:bg-slate-700/50 p-2 rounded">
+                                <span class="block text-slate-400">Electrons València</span>
+                                <strong id="valenceCount" class="text-sm font-semibold text-slate-800 dark:text-slate-200">1</strong>
+                            </div>
+                            <div class="bg-slate-100 dark:bg-slate-700/50 p-2 rounded">
+                                <span class="block text-slate-400">Capa València (n)</span>
+                                <strong id="valenceLevel" class="text-sm font-semibold text-slate-800 dark:text-slate-200">n = 1</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VISTA 2: DIAGRAMA DE MOELLER INTERACTIU -->
+                    <div id="viewMoeller" class="hidden flex flex-col gap-3">
+                        <div class="p-3 bg-slate-950 rounded-lg border border-slate-700 text-white relative overflow-hidden">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-arrow-trend-down text-indigo-400"></i> Diagrama de Moeller (Principi d'Aufbau)
+                                </span>
+                                <span id="moellerActiveSubshellText" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700">
+                                    Actiu: 1s¹
+                                </span>
+                            </div>
+
+                            <!-- Contenidor de la Graella de Moeller -->
+                            <div class="relative min-h-[250px] p-2 bg-slate-900/60 rounded border border-slate-800 overflow-x-auto">
+                                <svg id="moellerSvg" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+                                    <defs>
+                                        <marker id="moellerArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#818cf8"/>
+                                        </marker>
+                                    </defs>
+                                </svg>
+                                
+                                <div id="moellerGrid" class="relative z-10 flex flex-col gap-1.5 min-w-[340px]">
+                                    <!-- Generat dinàmicament per JS -->
+                                </div>
+                            </div>
+                            <div class="mt-2 text-[11px] text-slate-400 flex justify-between items-center">
+                                <span>* El subnivell en emplenament <strong>parpalleja</strong> a cada electró.</span>
+                                <span class="flex items-center gap-2">
+                                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span> Actiu
+                                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-700"></span> Buit
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Controls de Reproducció -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-md border border-slate-200 dark:border-slate-700 flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Navegació i Autoreproducció</span>
+                        <div class="flex items-center gap-2 text-xs">
+                            <label for="speedSelect" class="text-slate-500">Velocitat:</label>
+                            <select id="speedSelect" class="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-slate-800 dark:text-slate-200">
+                                <option value="1500">Lenta (1.5s)</option>
+                                <option value="800" selected>Normal (0.8s)</option>
+                                <option value="300">Ràpida (0.3s)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-3">
+                        <button id="btnPrev" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 rounded-lg font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-backward"></i> Anterior
+                        </button>
+                        <button id="btnPlay" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition shadow flex items-center gap-2">
+                            <i id="playIcon" class="fa-solid fa-play"></i> <span id="playText">Reproduir</span>
+                        </button>
+                        <button id="btnNext" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 rounded-lg font-bold transition flex items-center gap-2">
+                            Següent <i class="fa-solid fa-forward"></i>
+                        </button>
+                    </div>
+
+                    <!-- Experimentació d'Ionització -->
+                    <div class="mt-2 pt-4 border-t border-slate-200 dark:border-slate-700 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
+                                <i class="fa-solid fa-bolt mr-1"></i> Experimentació d'Ionització
+                            </span>
+                            <span class="text-xs text-slate-500">Arrenca electrons de la capa de valència</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="btnIonize" class="flex-1 py-2 px-3 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white font-bold text-xs rounded-lg shadow transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-radiation"></i> Llançar Radiació (Ionitzar)
+                            </button>
+                            <button id="btnResetIon" class="py-2 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg transition">
+                                Restablir Neutre
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Taula Periòdica Estesa (32 Columnes) -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-md border border-slate-200 dark:border-slate-700 flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-table-cells text-indigo-500"></i> Taula Periòdica Estesa (32 Columnes - Bloc f integrat)
+                </h3>
+                <span class="text-xs text-slate-500">Prem qualsevol element per seleccionar-lo directament</span>
+            </div>
+
+            <div class="w-full overflow-x-auto pb-2">
+                <div id="extendedTable" class="grid-extended min-w-[980px]">
+                    <!-- Generat en JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Explicació Didàctica amb Involucració KaTeX -->
+        <article class="bg-indigo-50/50 dark:bg-slate-800/50 rounded-xl p-5 border border-indigo-100 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 flex flex-col md:flex-row gap-4 items-start">
+            <div class="p-3 bg-indigo-600 text-white rounded-xl text-2xl flex-shrink-0">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-white text-base mb-2">Fundament Didàctic: Aufbau, Ionització i Excepcions d'Estabilitat</h4>
+                <p class="mb-2">
+                    Aquesta aplicació permet analitzar tres aspectes clau de l'estructura atòmica:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-xs md:text-sm">
+                    <li>
+                        <strong>Principi d'Aufbau vs Configuració Real:</strong> La regla de Madelung i el diagrama de Moeller indiquen l'ordre d'energia teòric. No obstant això, certs elements (com el Crom <span class="katex-inline" data-expr="Cr"></span>, Coure <span class="katex-inline" data-expr="Cu"></span>, o Pal·ladi <span class="katex-inline" data-expr="Pd"></span>) promouen electrons des de l'orbital <span class="katex-inline" data-expr="s"></span> cap a subnivells <span class="katex-inline" data-expr="d"></span> o <span class="katex-inline" data-expr="f"></span> per aconseguir una configuració semiple (<span class="katex-inline" data-expr="d^5, f^7"></span>) o totalment plena (<span class="katex-inline" data-expr="d^{10}, f^{14}"></span>) d'alta estabilitat. Activa el commutador superior per comparar ambdues configuracions i veure els elements ressaltats per blocs.
+                    </li>
+                    <li>
+                        <strong>Ionització des de la Capa de València:</strong> Quan un àtom perd electrons per formar un catió, aquests s'extreuen sempre de la capa més externa (<span class="katex-inline" data-expr="n_{\max}"></span>), encara que s'hagin emplenat en darrer lloc orbitals d'energia inferior com <span class="katex-inline" data-expr="3d"></span> o <span class="katex-inline" data-expr="4f"></span>.
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+    </main>
+
+    <!-- Peu de pàgina -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 text-center text-xs text-slate-500">
+        IES Algarb — Departament de Física i Química &copy; 2026. Desenvolupat per a GitHub Pages.
+    </footer>
+
+    <!-- LÒGICA JAVASCRIPT INTEGRADA -->
+    <script>
+        const ELEMENTS = [
+            { z: 1, sym: "H", name: "Hidrogen", period: 1, col: 1, block: "s" },
+            { z: 2, sym: "He", name: "Heli", period: 1, col: 2, block: "s" },
+            { z: 3, sym: "Li", name: "Liti", period: 2, col: 1, block: "s" },
+            { z: 4, sym: "Be", name: "Beril·li", period: 2, col: 2, block: "s" },
+            { z: 5, sym: "B", name: "Bor", period: 2, col: 27, block: "p" },
+            { z: 6, sym: "C", name: "Carboni", period: 2, col: 28, block: "p" },
+            { z: 7, sym: "N", name: "Nitrogen", period: 2, col: 29, block: "p" },
+            { z: 8, sym: "O", name: "Oxigen", period: 2, col: 30, block: "p" },
+            { z: 9, sym: "F", name: "Fluor", period: 2, col: 31, block: "p" },
+            { z: 10, sym: "Ne", name: "Neó", period: 2, col: 32, block: "p" },
+            { z: 11, sym: "Na", name: "Sodi", period: 3, col: 1, block: "s" },
+            { z: 12, sym: "Mg", name: "Magnesi", period: 3, col: 2, block: "s" },
+            { z: 13, sym: "Al", name: "Alumini", period: 3, col: 27, block: "p" },
+            { z: 14, sym: "Si", name: "Silici", period: 3, col: 28, block: "p" },
+            { z: 15, sym: "P", name: "Fòsfor", period: 3, col: 29, block: "p" },
+            { z: 16, sym: "S", name: "Sofre", period: 3, col: 30, block: "p" },
+            { z: 17, sym: "Cl", name: "Clor", period: 3, col: 31, block: "p" },
+            { z: 18, sym: "Ar", name: "Argó", period: 3, col: 32, block: "p" },
+            { z: 19, sym: "K", name: "Potassi", period: 4, col: 1, block: "s" },
+            { z: 20, sym: "Ca", name: "Calci", period: 4, col: 2, block: "s" },
+            { z: 21, sym: "Sc", name: "Escandi", period: 4, col: 17, block: "d" },
+            { z: 22, sym: "Ti", name: "Titani", period: 4, col: 18, block: "d" },
+            { z: 23, sym: "V", name: "Vanadi", period: 4, col: 19, block: "d" },
+            { z: 24, sym: "Cr", name: "Crom", period: 4, col: 20, block: "d" },
+            { z: 25, sym: "Mn", name: "Manganès", period: 4, col: 21, block: "d" },
+            { z: 26, sym: "Fe", name: "Ferro", period: 4, col: 22, block: "d" },
+            { z: 27, sym: "Co", name: "Cobalt", period: 4, col: 23, block: "d" },
+            { z: 28, sym: "Ni", name: "Níquel", period: 4, col: 24, block: "d" },
+            { z: 29, sym: "Cu", name: "Coure", period: 4, col: 25, block: "d" },
+            { z: 30, sym: "Zn", name: "Zinc", period: 4, col: 26, block: "d" },
+            { z: 31, sym: "Ga", name: "Gal·li", period: 4, col: 27, block: "p" },
+            { z: 32, sym: "Ge", name: "Germani", period: 4, col: 28, block: "p" },
+            { z: 33, sym: "As", name: "Arsènic", period: 4, col: 29, block: "p" },
+            { z: 34, sym: "Se", name: "Seleni", period: 4, col: 30, block: "p" },
+            { z: 35, sym: "Br", name: "Brom", period: 4, col: 31, block: "p" },
+            { z: 36, sym: "Kr", name: "Criptó", period: 4, col: 32, block: "p" },
+            { z: 37, sym: "Rb", name: "Rubidi", period: 5, col: 1, block: "s" },
+            { z: 38, sym: "Sr", name: "Estronci", period: 5, col: 2, block: "s" },
+            { z: 39, sym: "Y", name: "Itri", period: 5, col: 17, block: "d" },
+            { z: 40, sym: "Zr", name: "Zirconi", period: 5, col: 18, block: "d" },
+            { z: 41, sym: "Nb", name: "Niobi", period: 5, col: 19, block: "d" },
+            { z: 42, sym: "Mo", name: "Molibdè", period: 5, col: 20, block: "d" },
+            { z: 43, sym: "Tc", name: "Tecneci", period: 5, col: 21, block: "d" },
+            { z: 44, sym: "Ru", name: "Ruteni", period: 5, col: 22, block: "d" },
+            { z: 45, sym: "Rh", name: "Rodi", period: 5, col: 23, block: "d" },
+            { z: 46, sym: "Pd", name: "Pal·ladi", period: 5, col: 24, block: "d" },
+            { z: 47, sym: "Ag", name: "Plata", period: 5, col: 25, block: "d" },
+            { z: 48, sym: "Cd", name: "Cadmi", period: 5, col: 26, block: "d" },
+            { z: 49, sym: "In", name: "Indi", period: 5, col: 27, block: "p" },
+            { z: 50, sym: "Sn", name: "Llauna", period: 5, col: 28, block: "p" },
+            { z: 51, sym: "Sb", name: "Antimoni", period: 5, col: 29, block: "p" },
+            { z: 52, sym: "Te", name: "Tel·luri", period: 5, col: 30, block: "p" },
+            { z: 53, sym: "I", name: "Iode", period: 5, col: 31, block: "p" },
+            { z: 54, sym: "Xe", name: "Xenó", period: 5, col: 32, block: "p" },
+            { z: 55, sym: "Cs", name: "Cesi", period: 6, col: 1, block: "s" },
+            { z: 56, sym: "Ba", name: "Bari", period: 6, col: 2, block: "s" },
+            { z: 57, sym: "La", name: "Llàntan", period: 6, col: 3, block: "f" },
+            { z: 58, sym: "Ce", name: "Ceri", period: 6, col: 4, block: "f" },
+            { z: 59, sym: "Pr", name: "Praseodimi", period: 6, col: 5, block: "f" },
+            { z: 60, sym: "Nd", name: "Neodimi", period: 6, col: 6, block: "f" },
+            { z: 61, sym: "Pm", name: "Prometi", period: 6, col: 7, block: "f" },
+            { z: 62, sym: "Sm", name: "Samari", period: 6, col: 8, block: "f" },
+            { z: 63, sym: "Eu", name: "Europi", period: 6, col: 9, block: "f" },
+            { z: 64, sym: "Gd", name: "Gadolini", period: 6, col: 10, block: "f" },
+            { z: 65, sym: "Tb", name: "Terbi", period: 6, col: 11, block: "f" },
+            { z: 66, sym: "Dy", name: "Disprosi", period: 6, col: 12, block: "f" },
+            { z: 67, sym: "Ho", name: "Holmi", period: 6, col: 13, block: "f" },
+            { z: 68, sym: "Er", name: "Erbi", period: 6, col: 14, block: "f" },
+            { z: 69, sym: "Tm", name: "Tuli", period: 6, col: 15, block: "f" },
+            { z: 70, sym: "Yb", name: "Iterbi", period: 6, col: 16, block: "f" },
+            { z: 71, sym: "Lu", name: "Luteci", period: 6, col: 17, block: "d" },
+            { z: 72, sym: "Hf", name: "Hafni", period: 6, col: 18, block: "d" },
+            { z: 73, sym: "Ta", name: "Tàntal", period: 6, col: 19, block: "d" },
+            { z: 74, sym: "W", name: "Tungstè", period: 6, col: 20, block: "d" },
+            { z: 75, sym: "Re", name: "Reni", period: 6, col: 21, block: "d" },
+            { z: 76, sym: "Os", name: "Osmi", period: 6, col: 22, block: "d" },
+            { z: 77, sym: "Ir", name: "Iradi", period: 6, col: 23, block: "d" },
+            { z: 78, sym: "Pt", name: "Platí", period: 6, col: 24, block: "d" },
+            { z: 79, sym: "Au", name: "Or", period: 6, col: 25, block: "d" },
+            { z: 80, sym: "Hg", name: "Mercuri", period: 6, col: 26, block: "d" },
+            { z: 81, sym: "Tl", name: "Tal·li", period: 6, col: 27, block: "p" },
+            { z: 82, sym: "Pb", name: "Plom", period: 6, col: 28, block: "p" },
+            { z: 83, sym: "Bi", name: "Bismut", period: 6, col: 29, block: "p" },
+            { z: 84, sym: "Po", name: "Poloni", period: 6, col: 30, block: "p" },
+            { z: 85, sym: "At", name: "Astat", period: 6, col: 31, block: "p" },
+            { z: 86, sym: "Rn", name: "Radó", period: 6, col: 32, block: "p" },
+            { z: 87, sym: "Fr", name: "Franci", period: 7, col: 1, block: "s" },
+            { z: 88, sym: "Ra", name: "Radi", period: 7, col: 2, block: "s" },
+            { z: 89, sym: "Ac", name: "Actini", period: 7, col: 3, block: "f" },
+            { z: 90, sym: "Th", name: "Tori", period: 7, col: 4, block: "f" },
+            { z: 91, sym: "Pa", name: "Protactini", period: 7, col: 5, block: "f" },
+            { z: 92, sym: "U", name: "Urani", period: 7, col: 6, block: "f" },
+            { z: 93, sym: "Np", name: "Neptuni", period: 7, col: 7, block: "f" },
+            { z: 94, sym: "Pu", name: "Plutoni", period: 7, col: 8, block: "f" },
+            { z: 95, sym: "Am", name: "Americi", period: 7, col: 9, block: "f" },
+            { z: 96, sym: "Cm", name: "Curi", period: 7, col: 10, block: "f" },
+            { z: 97, sym: "Bk", name: "Berkeli", period: 7, col: 11, block: "f" },
+            { z: 98, sym: "Cf", name: "Californi", period: 7, col: 12, block: "f" },
+            { z: 99, sym: "Es", name: "Einsteini", period: 7, col: 13, block: "f" },
+            { z: 100, sym: "Fm", name: "Fermi", period: 7, col: 14, block: "f" },
+            { z: 101, sym: "Md", name: "Mendelevi", period: 7, col: 15, block: "f" },
+            { z: 102, sym: "No", name: "Nobeli", period: 7, col: 16, block: "f" },
+            { z: 103, sym: "Lr", name: "Laurenci", period: 7, col: 17, block: "d" },
+            { z: 104, sym: "Rf", name: "Rutherfordi", period: 7, col: 18, block: "d" },
+            { z: 105, sym: "Db", name: "Dubni", period: 7, col: 19, block: "d" },
+            { z: 106, sym: "Sg", name: "Seaborgi", period: 7, col: 20, block: "d" },
+            { z: 107, sym: "Bh", name: "Bohri", period: 7, col: 21, block: "d" },
+            { z: 108, sym: "Hs", name: "Hassi", period: 7, col: 22, block: "d" },
+            { z: 109, sym: "Mt", name: "Meitneri", period: 7, col: 23, block: "d" },
+            { z: 110, sym: "Ds", name: "Darmstadti", period: 7, col: 24, block: "d" },
+            { z: 111, sym: "Rg", name: "Roentgeni", period: 7, col: 25, block: "d" },
+            { z: 112, sym: "Cn", name: "Copernici", period: 7, col: 26, block: "d" },
+            { z: 113, sym: "Nh", name: "Nihoni", period: 7, col: 27, block: "p" },
+            { z: 114, sym: "Fl", name: "Flerovi", period: 7, col: 28, block: "p" },
+            { z: 115, sym: "Mc", name: "Moscovi", period: 7, col: 29, block: "p" },
+            { z: 116, sym: "Lv", name: "Livermori", period: 7, col: 30, block: "p" },
+            { z: 117, sym: "Ts", name: "Tennessi", period: 7, col: 31, block: "p" },
+            { z: 118, sym: "Og", name: "Oganessó", period: 7, col: 32, block: "p" }
+        ];
+
+        const ORBITAL_ORDER = [
+            { n: 1, type: 's', max: 2 },
+            { n: 2, type: 's', max: 2 },
+            { n: 2, type: 'p', max: 6 },
+            { n: 3, type: 's', max: 2 },
+            { n: 3, type: 'p', max: 6 },
+            { n: 4, type: 's', max: 2 },
+            { n: 3, type: 'd', max: 10 },
+            { n: 4, type: 'p', max: 6 },
+            { n: 5, type: 's', max: 2 },
+            { n: 4, type: 'd', max: 10 },
+            { n: 5, type: 'p', max: 6 },
+            { n: 6, type: 's', max: 2 },
+            { n: 4, type: 'f', max: 14 },
+            { n: 5, type: 'd', max: 10 },
+            { n: 6, type: 'p', max: 6 },
+            { n: 7, type: 's', max: 2 },
+            { n: 5, type: 'f', max: 14 },
+            { n: 6, type: 'd', max: 10 },
+            { n: 7, type: 'p', max: 6 }
+        ];
+
+        const MOELLER_STRUCTURE = [
+            { n: 1, subshells: [{type: 's', max: 2}] },
+            { n: 2, subshells: [{type: 's', max: 2}, {type: 'p', max: 6}] },
+            { n: 3, subshells: [{type: 's', max: 2}, {type: 'p', max: 6}, {type: 'd', max: 10}] },
+            { n: 4, subshells: [{type: 's', max: 2}, {type: 'p', max: 6}, {type: 'd', max: 10}, {type: 'f', max: 14}] },
+            { n: 5, subshells: [{type: 's', max: 2}, {type: 'p', max: 6}, {type: 'd', max: 10}, {type: 'f', max: 14}] },
+            { n: 6, subshells: [{type: 's', max: 2}, {type: 'p', max: 6}, {type: 'd', max: 10}] },
+            { n: 7, subshells: [{type: 's', max: 2}, {type: 'p', max: 6}] }
+        ];
+
+        const REAL_EXCEPTIONS = {
+            24: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:1},{n:3,type:'d',count:5}],
+            29: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:1},{n:3,type:'d',count:10}],
+            41: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:1},{n:4,type:'d',count:4}],
+            42: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:1},{n:4,type:'d',count:5}],
+            44: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:1},{n:4,type:'d',count:7}],
+            45: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:1},{n:4,type:'d',count:8}],
+            46: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:0},{n:4,type:'d',count:10}],
+            47: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:1},{n:4,type:'d',count:10}],
+            57: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:2},{n:5,type:'d',count:1}],
+            64: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:2},{n:4,type:'f',count:7},{n:5,type:'d',count:1}],
+            78: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:1},{n:4,type:'f',count:14},{n:5,type:'d',count:9}],
+            79: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:1},{n:4,type:'f',count:14},{n:5,type:'d',count:10}],
+            89: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:2},{n:4,type:'f',count:14},{n:5,type:'d',count:10},{n:6,type:'p',count:6},{n:7,type:'s',count:2},{n:6,type:'d',count:1}],
+            90: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:2},{n:4,type:'f',count:14},{n:5,type:'d',count:10},{n:6,type:'p',count:6},{n:7,type:'s',count:2},{n:6,type:'d',count:2}],
+            91: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:2},{n:5,type:'f',count:2},{n:6,type:'d',count:1}],
+            92: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:2},{n:5,type:'f',count:3},{n:6,type:'d',count:1}],
+            96: [{n:1,type:'s',count:2},{n:2,type:'s',count:2},{n:2,type:'p',count:6},{n:3,type:'s',count:2},{n:3,type:'p',count:6},{n:4,type:'s',count:2},{n:3,type:'d',count:10},{n:4,type:'p',count:6},{n:5,type:'s',count:2},{n:4,type:'d',count:10},{n:5,type:'p',count:6},{n:6,type:'s',count:2},{n:5,type:'f',count:7},{n:6,type:'d',count:1}]
+        };
+
+        const BLOCK_COLORS = { s: '#3b82f6', p: '#10b981', d: '#f59e0b', f: '#ec4899' };
+
+        let currentZ = 1;
+        let isPlaying = false;
+        let playInterval = null;
+        let ionizationCount = 0;
+        let isRealMode = false;
+        let isMoellerView = false;
+
+        let canvas, ctx;
+        let valenceAngle = 0;
+        let incomingElectron = null;
+        let radiationRay = null;
+
+        window.onload = function() {
+            setupTheme();
+            renderExtendedTable();
+            renderMoellerGrid();
+            setupCanvas();
+            renderInlineKaTeX();
+            setupMoellerToggle();
+            updateElement(currentZ);
+
+            document.getElementById('btnPrev').addEventListener('click', () => stepElement(-1));
+            document.getElementById('btnNext').addEventListener('click', () => stepElement(1));
+            document.getElementById('btnPlay').addEventListener('click', togglePlay);
+            document.getElementById('speedSelect').addEventListener('change', updatePlaySpeed);
+            document.getElementById('btnIonize').addEventListener('click', triggerIonization);
+            document.getElementById('btnResetIon').addEventListener('click', resetIonization);
+
+            const toggleMode = document.getElementById('configModeToggle');
+            toggleMode.addEventListener('change', (e) => {
+                isRealMode = e.target.checked;
+                const labTheo = document.getElementById('modeTheoreticalLabel');
+                const labReal = document.getElementById('modeRealLabel');
+
+                if (isRealMode) {
+                    labTheo.className = "text-xs font-medium text-slate-400";
+                    labReal.className = "text-xs font-bold text-amber-500";
+                } else {
+                    labTheo.className = "text-xs font-bold text-indigo-600 dark:text-indigo-400";
+                    labReal.className = "text-xs font-medium text-slate-400";
+                }
+                updateExtendedTableExceptions();
+                updateElement(currentZ, false);
+            });
+
+            requestAnimationFrame(animateCanvas);
+        };
+
+        function setupTheme() {
+            const toggleBtn = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+                icon.className = 'fa-solid fa-sun';
+            }
+
+            toggleBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            });
+        }
+
+        function setupMoellerToggle() {
+            const btn = document.getElementById('btnToggleMoeller');
+            const viewConfig = document.getElementById('viewConfig');
+            const viewMoeller = document.getElementById('viewMoeller');
+            const icon = document.getElementById('toggleViewIcon');
+            const text = document.getElementById('toggleViewText');
+
+            btn.addEventListener('click', () => {
+                isMoellerView = !isMoellerView;
+                if (isMoellerView) {
+                    viewConfig.classList.add('hidden');
+                    viewMoeller.classList.remove('hidden');
+                    icon.className = "fa-solid fa-list-ol text-indigo-500";
+                    text.textContent = "Vista Standard";
+                    setTimeout(drawMoellerSvgLines, 50);
+                } else {
+                    viewMoeller.classList.add('hidden');
+                    viewConfig.classList.remove('hidden');
+                    icon.className = "fa-solid fa-diagram-project text-indigo-500";
+                    text.textContent = "Diagrama de Moeller";
+                }
+            });
+        }
+
+        function renderInlineKaTeX() {
+            if (!window.katex) return;
+            document.querySelectorAll('.katex-inline').forEach(el => {
+                const expr = el.getAttribute('data-expr');
+                if (expr) {
+                    katex.render(expr, el, { throwOnError: false, displayMode: false });
+                }
+            });
+            katex.render('n = 1..7', document.getElementById('bohrNText'), { throwOnError: false });
+            katex.render('n_{\\max}', document.getElementById('bohrNVal'), { throwOnError: false });
+        }
+
+        function renderExtendedTable() {
+            const container = document.getElementById('extendedTable');
+            container.innerHTML = '';
+
+            for (let r = 1; r <= 7; r++) {
+                for (let c = 1; c <= 32; c++) {
+                    const elem = ELEMENTS.find(e => e.period === r && e.col === c);
+                    
+                    const cell = document.createElement('div');
+                    if (elem) {
+                        cell.className = `element-card text-white font-mono`;
+                        cell.style.backgroundColor = BLOCK_COLORS[elem.block];
+                        cell.dataset.z = elem.z;
+                        cell.dataset.block = elem.block;
+                        cell.innerHTML = `<span class="text-[9px] opacity-80">${elem.z}</span><span>${elem.sym}</span>`;
+                        cell.title = `${elem.name} (Z=${elem.z}) - Bloc ${elem.block}`;
+                        cell.addEventListener('click', () => setElement(elem.z));
+                    } else {
+                        cell.className = 'opacity-0 pointer-events-none';
+                    }
+                    container.appendChild(cell);
+                }
+            }
+            updateExtendedTableExceptions();
+        }
+
+        function renderMoellerGrid() {
+            const grid = document.getElementById('moellerGrid');
+            grid.innerHTML = '';
+
+            const types = ['s', 'p', 'd', 'f'];
+
+            MOELLER_STRUCTURE.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = "grid grid-cols-5 gap-1.5 items-center";
+
+                const labelDiv = document.createElement('div');
+                labelDiv.className = "text-xs font-mono font-bold text-indigo-300 text-center";
+                labelDiv.textContent = `n=${row.n}`;
+                rowDiv.appendChild(labelDiv);
+
+                types.forEach(t => {
+                    const subObj = row.subshells.find(s => s.type === t);
+                    const cell = document.createElement('div');
+
+                    if (subObj) {
+                        const key = `${row.n}${t}`;
+                        cell.dataset.key = key;
+                        cell.className = "subshell-card flex items-center justify-between px-2 py-1 rounded text-xs font-mono font-bold transition-all duration-200 border border-slate-700 bg-slate-900/80 text-slate-500 cursor-default select-none shadow-sm";
+                        cell.innerHTML = `<span>${key}</span><span class="sub-count text-[10px] font-bold">0/${subObj.max}</span>`;
+                    } else {
+                        cell.className = "opacity-0 pointer-events-none";
+                    }
+
+                    rowDiv.appendChild(cell);
+                });
+
+                grid.appendChild(rowDiv);
+            });
+        }
+
+        function drawMoellerSvgLines() {
+            const svg = document.getElementById('moellerSvg');
+            if (!svg || isMoellerView === false) return;
+            
+            const container = document.getElementById('moellerGrid');
+            if (!container) return;
+            const containerRect = container.getBoundingClientRect();
+            
+            const defs = svg.querySelector('defs');
+            svg.innerHTML = '';
+            if (defs) svg.appendChild(defs);
+            
+            const diagonals = [
+                ['1s'],
+                ['2s'],
+                ['2p', '3s'],
+                ['3p', '4s'],
+                ['3d', '4p', '5s'],
+                ['4d', '5p', '6s'],
+                ['4f', '5d', '6p', '7s'],
+                ['5f', '6d', '7p']
+            ];
+
+            diagonals.forEach(diag => {
+                const firstKey = diag[0];
+                const lastKey = diag[diag.length - 1];
+                
+                const firstEl = document.querySelector(`.subshell-card[data-key="${firstKey}"]`);
+                const lastEl = document.querySelector(`.subshell-card[data-key="${lastKey}"]`);
+                
+                if (!firstEl || !lastEl) return;
+                
+                const firstRect = firstEl.getBoundingClientRect();
+                const lastRect = lastEl.getBoundingClientRect();
+                
+                const startX = (firstRect.right - containerRect.left) + 6;
+                const startY = (firstRect.top - containerRect.top) - 6;
+                
+                const endX = (lastRect.left - containerRect.left) - 6;
+                const endY = (lastRect.bottom - containerRect.top) + 6;
+                
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", startX);
+                line.setAttribute("y1", startY);
+                line.setAttribute("x2", endX);
+                line.setAttribute("y2", endY);
+                line.setAttribute("stroke", "rgba(129, 140, 248, 0.35)");
+                line.setAttribute("stroke-width", "1.5");
+                line.setAttribute("stroke-dasharray", "3,3");
+                line.setAttribute("marker-end", "url(#moellerArrow)");
+                
+                svg.appendChild(line);
+            });
+        }
+
+        function updateExtendedTableExceptions() {
+            document.querySelectorAll('.element-card[data-z]').forEach(card => {
+                const z = parseInt(card.dataset.z);
+                const block = card.dataset.block;
+
+                card.classList.remove('is-exception-d', 'is-exception-f');
+
+                if (isRealMode && REAL_EXCEPTIONS[z]) {
+                    if (block === 'f') {
+                        card.classList.add('is-exception-f');
+                    } else {
+                        card.classList.add('is-exception-d');
+                    }
+                }
+            });
+        }
+
+        function getElectronConfiguration(z, ionCount = 0) {
+            let subshells = [];
+
+            if (isRealMode && REAL_EXCEPTIONS[z]) {
+                subshells = JSON.parse(JSON.stringify(REAL_EXCEPTIONS[z]));
+            } else {
+                let electronsToDistribute = z;
+                for (let orb of ORBITAL_ORDER) {
+                    if (electronsToDistribute <= 0) break;
+                    let count = Math.min(orb.max, electronsToDistribute);
+                    subshells.push({ n: orb.n, type: orb.type, count: count, max: orb.max });
+                    electronsToDistribute -= count;
+                }
+            }
+
+            let ionRemoved = 0;
+            while (ionRemoved < ionCount && subshells.length > 0) {
+                let maxN = Math.max(...subshells.map(s => s.n));
+                let targetIdx = -1;
+                
+                for (let i = subshells.length - 1; i >= 0; i--) {
+                    if (subshells[i].n === maxN && subshells[i].count > 0) {
+                        targetIdx = i;
+                        break;
+                    }
+                }
+
+                if (targetIdx !== -1) {
+                    subshells[targetIdx].count--;
+                    ionRemoved++;
+                    if (subshells[targetIdx].count === 0) {
+                        subshells.splice(targetIdx, 1);
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            return subshells;
+        }
+
+        function updateElement(z, isNewArrival = false) {
+            currentZ = z;
+            const elem = ELEMENTS.find(e => e.z === z);
+            if (!elem) return;
+
+            document.getElementById('elemZ').textContent = elem.z;
+            document.getElementById('elemSymbol').textContent = elem.sym;
+            document.getElementById('elemName').textContent = elem.name;
+            
+            const badge = document.getElementById('blockBadge');
+            badge.textContent = `Bloc ${elem.block}`;
+            badge.style.backgroundColor = BLOCK_COLORS[elem.block];
+
+            document.querySelectorAll('.element-card[data-z]').forEach(card => {
+                if (parseInt(card.dataset.z) === z) {
+                    card.classList.add('active', 'active-pulse');
+                } else {
+                    card.classList.remove('active', 'active-pulse');
+                }
+            });
+
+            const subshells = getElectronConfiguration(z, ionizationCount);
+            renderKaTeXConfig(z, ionizationCount, subshells);
+            updateMoellerDiagram(subshells, isNewArrival);
+
+            if (isNewArrival) {
+                const lastSub = subshells[subshells.length - 1];
+                incomingElectron = {
+                    progress: 0,
+                    targetN: lastSub ? lastSub.n : 1,
+                    block: elem.block
+                };
+            }
+        }
+
+        function updateMoellerDiagram(subshells, isNewArrival) {
+            const countsByKey = {};
+            subshells.forEach(s => {
+                countsByKey[`${s.n}${s.type}`] = s.count;
+            });
+
+            const maxCaps = { s: 2, p: 6, d: 10, f: 14 };
+
+            document.querySelectorAll('.subshell-card[data-key]').forEach(card => {
+                const key = card.dataset.key;
+                const type = key.slice(-1);
+                const max = maxCaps[type] || 2;
+                const count = countsByKey[key] || 0;
+                const countSpan = card.querySelector('.sub-count');
+
+                if (countSpan) {
+                    countSpan.textContent = `${count}/${max}`;
+                }
+
+                if (count === 0) {
+                    card.className = "subshell-card flex items-center justify-between px-2 py-1 rounded text-xs font-mono font-bold transition-all duration-200 border border-slate-700 bg-slate-900/80 text-slate-500 cursor-default select-none shadow-sm";
+                } else if (count === max) {
+                    card.className = "subshell-card flex items-center justify-between px-2 py-1 rounded text-xs font-mono font-bold transition-all duration-200 border border-indigo-400 bg-indigo-600 text-white cursor-default select-none shadow";
+                } else {
+                    card.className = "subshell-card flex items-center justify-between px-2 py-1 rounded text-xs font-mono font-bold transition-all duration-200 border-2 border-amber-400 bg-amber-500 text-slate-950 cursor-default select-none shadow-md";
+                }
+            });
+
+            const lastSub = subshells[subshells.length - 1];
+            const activeText = document.getElementById('moellerActiveSubshellText');
+
+            if (lastSub) {
+                const activeKey = `${lastSub.n}${lastSub.type}`;
+                activeText.textContent = `Actiu: ${activeKey}³`.replace('³', superscriptNum(lastSub.count));
+
+                if (isNewArrival) {
+                    triggerSubshellFlash(activeKey);
+                }
+            } else {
+                activeText.textContent = `Sense electrons`;
+            }
+
+            if (isMoellerView) {
+                drawMoellerSvgLines();
+            }
+        }
+
+        function triggerSubshellFlash(subKey) {
+            const el = document.querySelector(`.subshell-card[data-key="${subKey}"]`);
+            if (!el) return;
+
+            el.classList.remove('flash-subshell');
+            void el.offsetWidth;
+            el.classList.add('flash-subshell');
+        }
+
+        function setElement(z) {
+            resetIonization();
+            const isAdvance = z > currentZ;
+            updateElement(z, isAdvance);
+        }
+
+        function stepElement(delta) {
+            let nextZ = currentZ + delta;
+            if (nextZ < 1) nextZ = 118;
+            if (nextZ > 118) nextZ = 1;
+            setElement(nextZ);
+        }
+
+        function renderKaTeXConfig(z, ionCount, subshells) {
+            const elem = ELEMENTS.find(e => e.z === z);
+            const excBadge = document.getElementById('exceptionBadge');
+
+            if (isRealMode && REAL_EXCEPTIONS[z]) {
+                excBadge.classList.remove('hidden');
+            } else {
+                excBadge.classList.add('hidden');
+            }
+
+            if (subshells.length === 0) {
+                if (window.katex) {
+                    katex.render('\\text{Sense electrons}', document.getElementById('katexConfig'), {
+                        throwOnError: false,
+                        displayMode: false
+                    });
+                } else {
+                    document.getElementById('katexConfig').textContent = "Sense electrons";
+                }
+                return;
+            }
+
+            let latexStr = subshells.map(s => `${s.n}${s.type}^{${s.count}}`).join('\\ ');
+            
+            if (ionCount > 0) {
+                let ionCharge = ionCount === 1 ? '+' : `${ionCount}+`;
+                latexStr = `\\mathbf{${elem.sym}^{${ionCharge}}}:\\ ` + latexStr;
+                document.getElementById('ionStateBadge').classList.remove('hidden');
+                document.getElementById('ionStateBadge').textContent = `Espècie Ionitzada (${elem.sym}${ionCharge})`;
+            } else {
+                document.getElementById('ionStateBadge').classList.add('hidden');
+            }
+
+            if (window.katex) {
+                katex.render(latexStr, document.getElementById('katexConfig'), {
+                    throwOnError: false,
+                    displayMode: false
+                });
+            } else {
+                document.getElementById('katexConfig').textContent = latexStr;
+            }
+
+            const maxN = Math.max(...subshells.map(s => s.n));
+            const valenceElectrons = subshells.filter(s => s.n === maxN).reduce((acc, s) => acc + s.count, 0);
+            const lastSub = subshells[subshells.length - 1];
+
+            document.getElementById('valenceCount').textContent = valenceElectrons;
+            document.getElementById('valenceLevel').textContent = `n = ${maxN}`;
+            document.getElementById('lastSubshell').textContent = lastSub ? `${lastSub.n}${lastSub.type}³`.replace('³', superscriptNum(lastSub.count)) : '-';
+        }
+
+        function superscriptNum(num) {
+            const supers = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹", "¹⁰", "¹¹", "¹²", "¹³", "¹⁴"];
+            return supers[num] || num;
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const playText = document.getElementById('playText');
+            const playIcon = document.getElementById('playIcon');
+
+            if (isPlaying) {
+                playText.textContent = "Pausa";
+                playIcon.className = "fa-solid fa-pause";
+                startPlayInterval();
+            } else {
+                playText.textContent = "Reproduir";
+                playIcon.className = "fa-solid fa-play";
+                clearInterval(playInterval);
+            }
+        }
+
+        function startPlayInterval() {
+            clearInterval(playInterval);
+            const speed = parseInt(document.getElementById('speedSelect').value);
+            playInterval = setInterval(() => {
+                if (currentZ < 118) {
+                    stepElement(1);
+                } else {
+                    togglePlay();
+                }
+            }, speed);
+        }
+
+        function updatePlaySpeed() {
+            if (isPlaying) startPlayInterval();
+        }
+
+        function triggerIonization() {
+            const subshells = getElectronConfiguration(currentZ, ionizationCount);
+            if (subshells.length === 0) return;
+
+            radiationRay = { progress: 0 };
+            ionizationCount++;
+            const newSubshells = getElectronConfiguration(currentZ, ionizationCount);
+            renderKaTeXConfig(currentZ, ionizationCount, newSubshells);
+            updateMoellerDiagram(newSubshells, false);
+        }
+
+        function resetIonization() {
+            ionizationCount = 0;
+            const subshells = getElectronConfiguration(currentZ, 0);
+            renderKaTeXConfig(currentZ, 0, subshells);
+            updateMoellerDiagram(subshells, false);
+        }
+
+        function setupCanvas() {
+            canvas = document.getElementById('bohrCanvas');
+            ctx = canvas.getContext('2d');
+            
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+        }
+
+        function animateCanvas() {
+            if (!ctx) return;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const centerX = w / 2;
+            const centerY = h / 2;
+            const maxRadius = Math.min(w, h) * 0.44;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Nucli
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 16, 0, Math.PI * 2);
+            ctx.fillStyle = '#ef4444';
+            ctx.shadowColor = 'rgba(239, 68, 68, 0.6)';
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`+${currentZ}`, centerX, centerY);
+
+            const subshells = getElectronConfiguration(currentZ, ionizationCount);
+            const maxN = subshells.length > 0 ? Math.max(...subshells.map(s => s.n)) : 0;
+
+            const numOrbits = 7;
+            const orbitGap = maxRadius / numOrbits;
+
+            for (let n = 1; n <= numOrbits; n++) {
+                const r = n * orbitGap;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+                ctx.strokeStyle = (n === maxN) ? 'rgba(99, 102, 241, 0.5)' : 'rgba(148, 163, 184, 0.15)';
+                ctx.lineWidth = (n === maxN) ? 2.5 : 1;
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
+                ctx.font = '10px sans-serif';
+                ctx.fillText(`n=${n}`, centerX + r + 10, centerY);
+            }
+
+            let electronsByN = {};
+            subshells.forEach(s => {
+                if (!electronsByN[s.n]) electronsByN[s.n] = [];
+                for (let i = 0; i < s.count; i++) {
+                    electronsByN[s.n].push(s.type);
+                }
+            });
+
+            valenceAngle += 0.015;
+
+            Object.keys(electronsByN).forEach(nStr => {
+                const n = parseInt(nStr);
+                const r = n * orbitGap;
+                const eList = electronsByN[n];
+                const count = eList.length;
+
+                const angleOffset = (n === maxN) ? valenceAngle : 0;
+
+                eList.forEach((type, index) => {
+                    const angle = angleOffset + (index * (2 * Math.PI / count));
+                    const ex = centerX + r * Math.cos(angle);
+                    const ey = centerY + r * Math.sin(angle);
+
+                    ctx.beginPath();
+                    ctx.arc(ex, ey, 7, 0, Math.PI * 2);
+                    ctx.fillStyle = BLOCK_COLORS[type] || '#3b82f6';
+                    ctx.shadowColor = BLOCK_COLORS[type];
+                    ctx.shadowBlur = (n === maxN) ? 10 : 3;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    if (n === maxN) {
+                        ctx.beginPath();
+                        ctx.arc(ex, ey, 10, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            if (incomingElectron) {
+                incomingElectron.progress += 0.04;
+                const targetR = incomingElectron.targetN * orbitGap;
+                const startX = 0;
+                const startY = centerY;
+                const targetX = centerX - targetR;
+                const targetY = centerY;
+
+                const curX = startX + (targetX - startX) * incomingElectron.progress;
+                const curY = startY + (targetY - startY) * incomingElectron.progress;
+
+                ctx.beginPath();
+                ctx.arc(curX, curY, 9, 0, Math.PI * 2);
+                ctx.fillStyle = BLOCK_COLORS[incomingElectron.block];
+                ctx.shadowColor = '#ffffff';
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                if (incomingElectron.progress >= 1) incomingElectron = null;
+            }
+
+            if (radiationRay) {
+                radiationRay.progress += 0.05;
+                const p = radiationRay.progress;
+                
+                ctx.beginPath();
+                ctx.moveTo(w, 0);
+                ctx.lineTo(centerX + (maxN * orbitGap) * Math.cos(valenceAngle), centerY + (maxN * orbitGap) * Math.sin(valenceAngle));
+                ctx.strokeStyle = `rgba(239, 68, 68, ${1 - p})`;
+                ctx.lineWidth = 6;
+                ctx.stroke();
+
+                const expelDist = p * 150;
+                const expelX = centerX + (maxN * orbitGap + expelDist) * Math.cos(valenceAngle);
+                const expelY = centerY + (maxN * orbitGap + expelDist) * Math.sin(valenceAngle);
+
+                ctx.beginPath();
+                ctx.arc(expelX, expelY, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#ef4444';
+                ctx.fill();
+
+                if (radiationRay.progress >= 1) radiationRay = null;
+            }
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.addEventListener('resize', () => {
+            if (canvas) setupCanvas();
+            if (isMoellerView) drawMoellerSvgLines();
+        });
+    </script>
+</body>
+</html>
